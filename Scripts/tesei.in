@@ -1,0 +1,367 @@
+# TESEI MODEL CALVADOS2#
+#
+##### DO NOT CHANGE #####
+units       real # rela units https://docs.lammps.org/units.html
+dimension   3
+boundary    p p p # periodic boundary conditions in the 3 dimensions
+atom_style  full
+bond_style  harmonic # harmonic bonds between amino acids
+angle_style harmonic # added for the reactions
+##### END NO CHANGE #####
+
+variable T equal 250 # Temperature in K
+variable nts equal 50000000
+variable csx equal 150 # Electrolyte solution ionic strength in mM
+variable cs equal (${csx}/1000)*6.022e26 # Electrolyte solution ionic strength in m^-3
+variable er equal 5321/${T}+233.76-0.9297*${T}+0.001417*${T}*${T}-0.0000008292*${T}*${T}*${T} # Relative dielectric constant of the medium
+dielectric  ${er} # Relative dielectric constant of the medium again, it has to be defined here as well
+variable bjerrum equal (1.671e-5)/(${er}*${T}) # Bjerrum length in meters
+variable debyelen equal sqrt(1/(8*3.141592*${bjerrum}*${cs})) # Debye length in meters
+variable debyelenang equal ${debyelen}*1e10 # Debye length in Angstrom
+variable kappa equal 1/${debyelenang} # Inverse of debye length in Angstrom^-1 to go to pair style command
+
+print "Temperature = ${T} K"
+print "Ionic strength = ${csx} mM"
+print "epsilon_r (Dielectric constant of the medium) = ${er} (should be close to 80)"
+print "Debye length = ${debyelenang} Angstrom (should be close to 10)"
+
+pair_style  ljlambda ${kappa} 0.0 40.0 #  Ashbaugh-Hatch + Debye-Huckel potential, LAMMPS compiled with ljlambda.cpp and ljlambda.h. Coefficients are kappa (inverse of Debye length), LJ cutoff and Coulomb Cutoff, they are redefined later anyway so last 2 are not that relevant
+
+read_data data.xyz  #  ahorasi #foto_inicial
+#read_restart  save # rest_dios
+
+#group borrar1 molecule > 124
+#delete_atoms group borrar1 bond yes
+#replicate 24 2 1
+
+##### MODEL PARAMETERS #####
+bond_coeff          1     9.6      3.8 # Harmonic bonds (only 1 type), force constant 9.6kcal/mol and resting distance 3.8 Angstrom
+mass 1 131.2 # M METIONINE
+mass 2 57.05 # G GLYCINE
+mass 3 128.17 # K LYSINE
+mass 4 101.11 # T THREONINE
+mass 5 156.19 # R ARGININE
+mass 6 71.07 # A ALANINE
+mass 7 115.09 # D ASPARTIC ACID
+mass 8 129.11 # E GLUTAMIC ACID
+mass 9 163.18 # Y TYROSINE
+mass 10 99.13 # V VALINE
+mass 11 113.16 # L LEUCINE
+mass 12 128.13 # Q GLUTAMINE
+mass 13 186.22 # w TRYPTOPHANE
+mass 14 147.18 # F PHENYLALANINE
+mass 15 87.08 # S SERINE
+mass 16 137.14 # H HYSTIDINE
+mass 17 114.1 # N ASPARGINE
+mass 18 97.12 # P PROLINE
+mass 19 103.14 # C CYSTEINE
+mass 20 113.16 # I ISOLEUCINE
+
+
+set type * charge 0
+set type 3 charge 1
+set type 5 charge 1
+set type 7 charge -1
+set type 8 charge -1
+# parameters documentation in https://github.com/KULL-Centre/CALVADOS/blob/main/residues.csv
+#extra parameters for reactions:
+angle_coeff         1     0.0001      180
+angle_coeff         2     5          180
+# pairwise coefficients
+#         type1  type2 epsilon  sigma       lambda   lj_cut coulm_cut # aminoacid1 aminoacid2
+pair_coeff   *   *  0.000   0.000     0.0000       0.000  0.000
+pair_coeff  1   1   0.2  6.17999983  0.530848086     20  0   #METIONINE      METIONINE                     
+pair_coeff  1   2   0.2  5.33999968  0.618366241     20  0   #METIONINE      GLYCINE                       
+pair_coeff  1   3   0.2  6.26999950  0.354934633     20  0   #METIONINE      LYSINE                        
+pair_coeff  1   4   0.2  5.89999962  0.451082170     20  0   #METIONINE      THREONINE                     
+pair_coeff  1   5   0.2  6.36999941  0.630805254     20  0   #METIONINE      ARGININE                      
+pair_coeff  1   6   0.2  5.60999966  0.402588964     20  0   #METIONINE      ALANINE                       
+pair_coeff  1   7   0.2  5.88000011  0.286226064     20  0   #METIONINE      ASPARTIC       AC             
+pair_coeff  1   8   0.2  6.05000019  0.265770823     20  0   #METIONINE      GLUTAMIC       AC             
+pair_coeff  1   9   0.2  6.31999969  0.754154623     20  0   #METIONINE      TYROSINE                      
+pair_coeff  1   10  0.2  6.01999998  0.369612515     20  0   #METIONINE      VALINE                        
+pair_coeff  1   11  0.2  6.17999983  0.587424278     20  0   #METIONINE      LEUCINE                       
+pair_coeff  1   12  0.2  6.09999990  0.462139964     20  0   #METIONINE      GLUTAMINE                     
+pair_coeff  1   13  0.2  6.48000002  0.760112286     20  0   #METIONINE      TRYPTOPHANE                   
+pair_coeff  1   14  0.2  6.26999950  0.699041963     20  0   #METIONINE      PHENYLALANINE                 
+pair_coeff  1   15  0.2  5.67999935  0.496694863     20  0   #METIONINE      SERINE                        
+pair_coeff  1   16  0.2  6.12999964  0.498607397     20  0   #METIONINE      HYSTIDINE                     
+pair_coeff  1   17  0.2  5.92999983  0.478217006     20  0   #METIONINE      ASPARGINE                     
+pair_coeff  1   18  0.2  5.86999989  0.445080370     20  0   #METIONINE      PROLINE                       
+pair_coeff  1   19  0.2  5.82999945  0.546195805     20  0   #METIONINE      CYSTEINE                      
+pair_coeff  1   20  0.2  6.17999983  0.536605239     20  0   #METIONINE      ISOLEUCINE                    
+pair_coeff  2   2   0.2  4.50000000  0.705884397     20  0   #GLYCINE        GLYCINE                       
+pair_coeff  2   3   0.2  5.42999983  0.442452788     20  0   #GLYCINE        LYSINE                        
+pair_coeff  2   4   0.2  5.05999994  0.538600326     20  0   #GLYCINE        THREONINE                     
+pair_coeff  2   5   0.2  5.52999973  0.718323469     20  0   #GLYCINE        ARGININE                      
+pair_coeff  2   6   0.2  4.76999998  0.490107119     20  0   #GLYCINE        ALANINE                       
+pair_coeff  2   7   0.2  5.03999996  0.373744220     20  0   #GLYCINE        ASPARTIC       AC             
+pair_coeff  2   8   0.2  5.21000004  0.353288978     20  0   #GLYCINE        GLUTAMIC       AC             
+pair_coeff  2   9   0.2  5.47999954  0.841672778     20  0   #GLYCINE        TYROSINE                      
+pair_coeff  2   10  0.2  5.17999983  0.457130671     20  0   #GLYCINE        VALINE                        
+pair_coeff  2   11  0.2  5.33999968  0.674942493     20  0   #GLYCINE        LEUCINE                       
+pair_coeff  2   12  0.2  5.26000023  0.549658120     20  0   #GLYCINE        GLUTAMINE                     
+pair_coeff  2   13  0.2  5.63999987  0.847630441     20  0   #GLYCINE        TRYPTOPHANE                   
+pair_coeff  2   14  0.2  5.42999983  0.786560178     20  0   #GLYCINE        PHENYLALANINE                 
+pair_coeff  2   15  0.2  4.83999968  0.584213018     20  0   #GLYCINE        SERINE                        
+pair_coeff  2   16  0.2  5.28999996  0.586125553     20  0   #GLYCINE        HYSTIDINE                     
+pair_coeff  2   17  0.2  5.09000015  0.565735161     20  0   #GLYCINE        ASPARGINE                     
+pair_coeff  2   18  0.2  5.03000021  0.532598495     20  0   #GLYCINE        PROLINE                       
+pair_coeff  2   19  0.2  4.98999977  0.633713961     20  0   #GLYCINE        CYSTEINE                      
+pair_coeff  2   20  0.2  5.33999968  0.624123335     20  0   #GLYCINE        ISOLEUCINE                    
+pair_coeff  3   3   0.2  6.35999966  0.179021180     20  40  #LYSINE         LYSINE                        
+pair_coeff  3   4   0.2  5.98999977  0.275168717     20  0   #LYSINE         THREONINE                     
+pair_coeff  3   5   0.2  6.46000004  0.454891831     20  40  #LYSINE         ARGININE                      
+pair_coeff  3   6   0.2  5.69999981  0.226675496     20  0   #LYSINE         ALANINE                       
+pair_coeff  3   7   0.2  5.96999979  0.110312611     20  40  #LYSINE         ASPARTIC       AC             
+pair_coeff  3   8   0.2  6.13999939  8.98573622E-02  20  40  #LYSINE         GLUTAMIC       AC             
+pair_coeff  3   9   0.2  6.41000032  0.578241169     20  0   #LYSINE         TYROSINE                      
+pair_coeff  3   10  0.2  6.11000013  0.193699062     20  0   #LYSINE         VALINE                        
+pair_coeff  3   11  0.2  6.26999950  0.411510855     20  0   #LYSINE         LEUCINE                       
+pair_coeff  3   12  0.2  6.18999958  0.286226511     20  0   #LYSINE         GLUTAMINE                     
+pair_coeff  3   13  0.2  6.56999922  0.584198833     20  0   #LYSINE         TRYPTOPHANE                   
+pair_coeff  3   14  0.2  6.35999966  0.523128510     20  0   #LYSINE         PHENYLALANINE                 
+pair_coeff  3   15  0.2  5.76999998  0.320781410     20  0   #LYSINE         SERINE                        
+pair_coeff  3   16  0.2  6.21999979  0.322693944     20  40  #LYSINE         HYSTIDINE                     
+pair_coeff  3   17  0.2  6.01999998  0.302303553     20  0   #LYSINE         ASPARGINE                     
+pair_coeff  3   18  0.2  5.95999956  0.269166917     20  0   #LYSINE         PROLINE                       
+pair_coeff  3   19  0.2  5.92000008  0.370282352     20  0   #LYSINE         CYSTEINE                      
+pair_coeff  3   20  0.2  6.26999950  0.360691756     20  0   #LYSINE         ISOLEUCINE                    
+pair_coeff  4   4   0.2  5.61999989  0.371316284     20  0   #THREONINE      THREONINE                     
+pair_coeff  4   5   0.2  6.08999968  0.551039398     20  0   #THREONINE      ARGININE                      
+pair_coeff  4   6   0.2  5.32999992  0.322823048     20  0   #THREONINE      ALANINE                       
+pair_coeff  4   7   0.2  5.59999990  0.206460163     20  0   #THREONINE      ASPARTIC       AC             
+pair_coeff  4   8   0.2  5.76999998  0.186004922     20  0   #THREONINE      GLUTAMIC       AC             
+pair_coeff  4   9   0.2  6.03999949  0.674388707     20  0   #THREONINE      TYROSINE                      
+pair_coeff  4   10  0.2  5.73999977  0.289846629     20  0   #THREONINE      VALINE                        
+pair_coeff  4   11  0.2  5.89999962  0.507658422     20  0   #THREONINE      LEUCINE                       
+pair_coeff  4   12  0.2  5.82000017  0.382374048     20  0   #THREONINE      GLUTAMINE                     
+pair_coeff  4   13  0.2  6.19999981  0.680346370     20  0   #THREONINE      TRYPTOPHANE                   
+pair_coeff  4   14  0.2  5.98999977  0.619276106     20  0   #THREONINE      PHENYLALANINE                 
+pair_coeff  4   15  0.2  5.39999962  0.416928977     20  0   #THREONINE      SERINE                        
+pair_coeff  4   16  0.2  5.84999990  0.418841511     20  0   #THREONINE      HYSTIDINE                     
+pair_coeff  4   17  0.2  5.65000010  0.398451090     20  0   #THREONINE      ASPARGINE                     
+pair_coeff  4   18  0.2  5.59000015  0.365314484     20  0   #THREONINE      PROLINE                       
+pair_coeff  4   19  0.2  5.54999924  0.466429889     20  0   #THREONINE      CYSTEINE                      
+pair_coeff  4   20  0.2  5.89999962  0.456839323     20  0   #THREONINE      ISOLEUCINE                    
+pair_coeff  5   5   0.2  6.55999994  0.730762482     20  40  #ARGININE       ARGININE                      
+pair_coeff  5   6   0.2  5.80000019  0.502546132     20  0   #ARGININE       ALANINE                       
+pair_coeff  5   7   0.2  6.06999969  0.386183262     20  40  #ARGININE       ASPARTIC       AC             
+pair_coeff  5   8   0.2  6.24000025  0.365728021     20  40  #ARGININE       GLUTAMIC       AC             
+pair_coeff  5   9   0.2  6.51000023  0.854111791     20  0   #ARGININE       TYROSINE                      
+pair_coeff  5   10  0.2  6.21000051  0.469569713     20  0   #ARGININE       VALINE                        
+pair_coeff  5   11  0.2  6.36999941  0.687381506     20  0   #ARGININE       LEUCINE                       
+pair_coeff  5   12  0.2  6.28999996  0.562097192     20  0   #ARGININE       GLUTAMINE                     
+pair_coeff  5   13  0.2  6.67000008  0.860069513     20  0   #ARGININE       TRYPTOPHANE                   
+pair_coeff  5   14  0.2  6.46000004  0.798999190     20  0   #ARGININE       PHENYLALANINE                 
+pair_coeff  5   15  0.2  5.86999989  0.596652091     20  0   #ARGININE       SERINE                        
+pair_coeff  5   16  0.2  6.31999969  0.598564625     20  40  #ARGININE       HYSTIDINE                     
+pair_coeff  5   17  0.2  6.11999989  0.578174174     20  0   #ARGININE       ASPARGINE                     
+pair_coeff  5   18  0.2  6.05999994  0.545037568     20  0   #ARGININE       PROLINE                       
+pair_coeff  5   19  0.2  6.01999998  0.646152973     20  0   #ARGININE       CYSTEINE                      
+pair_coeff  5   20  0.2  6.36999941  0.636562407     20  0   #ARGININE       ISOLEUCINE                    
+pair_coeff  6   6   0.2  5.03999996  0.274329811     20  0   #ALANINE        ALANINE                       
+pair_coeff  6   7   0.2  5.30999994  0.157966927     20  0   #ALANINE        ASPARTIC       AC             
+pair_coeff  6   8   0.2  5.47999954  0.137511685     20  0   #ALANINE        GLUTAMIC       AC             
+pair_coeff  6   9   0.2  5.75000048  0.625895500     20  0   #ALANINE        TYROSINE                      
+pair_coeff  6   10  0.2  5.45000029  0.241353393     20  0   #ALANINE        VALINE                        
+pair_coeff  6   11  0.2  5.60999966  0.459165156     20  0   #ALANINE        LEUCINE                       
+pair_coeff  6   12  0.2  5.52999973  0.333880842     20  0   #ALANINE        GLUTAMINE                     
+pair_coeff  6   13  0.2  5.90999937  0.631853163     20  0   #ALANINE        TRYPTOPHANE                   
+pair_coeff  6   14  0.2  5.69999981  0.570782840     20  0   #ALANINE        PHENYLALANINE                 
+pair_coeff  6   15  0.2  5.11000013  0.368435740     20  0   #ALANINE        SERINE                        
+pair_coeff  6   16  0.2  5.55999994  0.370348275     20  0   #ALANINE        HYSTIDINE                     
+pair_coeff  6   17  0.2  5.36000013  0.349957854     20  0   #ALANINE        ASPARGINE                     
+pair_coeff  6   18  0.2  5.29999971  0.316821218     20  0   #ALANINE        PROLINE                       
+pair_coeff  6   19  0.2  5.26000023  0.417936683     20  0   #ALANINE        CYSTEINE                      
+pair_coeff  6   20  0.2  5.60999966  0.408346057     20  0   #ALANINE        ISOLEUCINE                    
+pair_coeff  7   7   0.2  5.58000040  4.16040495E-02  20  40  #ASPARTIC       AC             ASPARTIC       A
+pair_coeff  7   8   0.2  5.75000048  2.11487971E-02  20  40  #ASPARTIC       AC             GLUTAMIC       A
+pair_coeff  7   9   0.2  6.01999998  0.509532630     20  0   #ASPARTIC       AC             TYROSINE       
+pair_coeff  7   10  0.2  5.72000027  0.124990508     20  0   #ASPARTIC       AC             VALINE         
+pair_coeff  7   11  0.2  5.88000011  0.342802286     20  0   #ASPARTIC       AC             LEUCINE        
+pair_coeff  7   12  0.2  5.80000019  0.217517942     20  0   #ASPARTIC       AC             GLUTAMINE      
+pair_coeff  7   13  0.2  6.18000031  0.515490294     20  0   #ASPARTIC       AC             TRYPTOPHANE    
+pair_coeff  7   14  0.2  5.96999979  0.454419971     20  0   #ASPARTIC       AC             PHENYLALANINE  
+pair_coeff  7   15  0.2  5.37999964  0.252072871     20  0   #ASPARTIC       AC             SERINE         
+pair_coeff  7   16  0.2  5.82999992  0.253985405     20  40  #ASPARTIC       AC             HYSTIDINE      
+pair_coeff  7   17  0.2  5.63000011  0.233594969     20  0   #ASPARTIC       AC             ASPARGINE      
+pair_coeff  7   18  0.2  5.57000017  0.200458348     20  0   #ASPARTIC       AC             PROLINE        
+pair_coeff  7   19  0.2  5.52999973  0.301573783     20  0   #ASPARTIC       AC             CYSTEINE       
+pair_coeff  7   20  0.2  5.88000011  0.291983187     20  0   #ASPARTIC       AC             ISOLEUCINE     
+pair_coeff  8   8   0.2  5.92000008  6.93546084E-04  20  40  #GLUTAMIC       AC             GLUTAMIC       A
+pair_coeff  8   9   0.2  6.19000006  0.489077359     20  0   #GLUTAMIC       AC             TYROSINE       
+pair_coeff  8   10  0.2  5.88999987  0.104535252     20  0   #GLUTAMIC       AC             VALINE         
+pair_coeff  8   11  0.2  6.05000019  0.322347045     20  0   #GLUTAMIC       AC             LEUCINE        
+pair_coeff  8   12  0.2  5.96999979  0.197062701     20  0   #GLUTAMIC       AC             GLUTAMINE      
+pair_coeff  8   13  0.2  6.34999990  0.495035022     20  0   #GLUTAMIC       AC             TRYPTOPHANE    
+pair_coeff  8   14  0.2  6.13999939  0.433964729     20  0   #GLUTAMIC       AC             PHENYLALANINE  
+pair_coeff  8   15  0.2  5.55000019  0.231617615     20  0   #GLUTAMIC       AC             SERINE         
+pair_coeff  8   16  0.2  6.00000000  0.233530149     20  40  #GLUTAMIC       AC             HYSTIDINE      
+pair_coeff  8   17  0.2  5.80000019  0.213139728     20  0   #GLUTAMIC       AC             ASPARGINE      
+pair_coeff  8   18  0.2  5.73999977  0.180003107     20  0   #GLUTAMIC       AC             PROLINE        
+pair_coeff  8   19  0.2  5.69999981  0.281118542     20  0   #GLUTAMIC       AC             CYSTEINE       
+pair_coeff  8   20  0.2  6.05000019  0.271527946     20  0   #GLUTAMIC       AC             ISOLEUCINE     
+pair_coeff  9   9   0.2  6.46000004  0.977461159     20  0   #TYROSINE       TYROSINE                      
+pair_coeff  9   10  0.2  6.16000032  0.592919052     20  0   #TYROSINE       VALINE                        
+pair_coeff  9   11  0.2  6.31999969  0.810730815     20  0   #TYROSINE       LEUCINE                       
+pair_coeff  9   12  0.2  6.24000025  0.685446501     20  0   #TYROSINE       GLUTAMINE                     
+pair_coeff  9   13  0.2  6.61999989  0.983418822     20  0   #TYROSINE       TRYPTOPHANE                   
+pair_coeff  9   14  0.2  6.41000032  0.922348499     20  0   #TYROSINE       PHENYLALANINE                 
+pair_coeff  9   15  0.2  5.82000017  0.720001400     20  0   #TYROSINE       SERINE                        
+pair_coeff  9   16  0.2  6.26999950  0.721913934     20  0   #TYROSINE       HYSTIDINE                     
+pair_coeff  9   17  0.2  6.06999969  0.701523542     20  0   #TYROSINE       ASPARGINE                     
+pair_coeff  9   18  0.2  6.01000023  0.668386936     20  0   #TYROSINE       PROLINE                       
+pair_coeff  9   19  0.2  5.96999979  0.769502342     20  0   #TYROSINE       CYSTEINE                      
+pair_coeff  9   20  0.2  6.31999969  0.759911776     20  0   #TYROSINE       ISOLEUCINE                    
+pair_coeff  10  10  0.2  5.86000013  0.208376959     20  0   #VALINE         VALINE                        
+pair_coeff  10  11  0.2  6.01999998  0.426188737     20  0   #VALINE         LEUCINE                       
+pair_coeff  10  12  0.2  5.93999958  0.300904393     20  0   #VALINE         GLUTAMINE                     
+pair_coeff  10  13  0.2  6.31999969  0.598876715     20  0   #VALINE         TRYPTOPHANE                   
+pair_coeff  10  14  0.2  6.11000013  0.537806451     20  0   #VALINE         PHENYLALANINE                 
+pair_coeff  10  15  0.2  5.52000046  0.335459322     20  0   #VALINE         SERINE                        
+pair_coeff  10  16  0.2  5.96999979  0.337371856     20  0   #VALINE         HYSTIDINE                     
+pair_coeff  10  17  0.2  5.76999998  0.316981435     20  0   #VALINE         ASPARGINE                     
+pair_coeff  10  18  0.2  5.70999956  0.283844799     20  0   #VALINE         PROLINE                       
+pair_coeff  10  19  0.2  5.67000008  0.384960234     20  0   #VALINE         CYSTEINE                      
+pair_coeff  10  20  0.2  6.01999998  0.375369638     20  0   #VALINE         ISOLEUCINE                    
+pair_coeff  11  11  0.2  6.17999983  0.644000530     20  0   #LEUCINE        LEUCINE                       
+pair_coeff  11  12  0.2  6.09999990  0.518716216     20  0   #LEUCINE        GLUTAMINE                     
+pair_coeff  11  13  0.2  6.48000002  0.816688538     20  0   #LEUCINE        TRYPTOPHANE                   
+pair_coeff  11  14  0.2  6.26999950  0.755618215     20  0   #LEUCINE        PHENYLALANINE                 
+pair_coeff  11  15  0.2  5.67999935  0.553271115     20  0   #LEUCINE        SERINE                        
+pair_coeff  11  16  0.2  6.12999964  0.555183649     20  0   #LEUCINE        HYSTIDINE                     
+pair_coeff  11  17  0.2  5.92999983  0.534793198     20  0   #LEUCINE        ASPARGINE                     
+pair_coeff  11  18  0.2  5.86999989  0.501656592     20  0   #LEUCINE        PROLINE                       
+pair_coeff  11  19  0.2  5.82999945  0.602771997     20  0   #LEUCINE        CYSTEINE                      
+pair_coeff  11  20  0.2  6.17999983  0.593181431     20  0   #LEUCINE        ISOLEUCINE                    
+pair_coeff  12  12  0.2  6.01999998  0.393431842     20  0   #GLUTAMINE      GLUTAMINE                     
+pair_coeff  12  13  0.2  6.39999962  0.691404164     20  0   #GLUTAMINE      TRYPTOPHANE                   
+pair_coeff  12  14  0.2  6.18999958  0.630333900     20  0   #GLUTAMINE      PHENYLALANINE                 
+pair_coeff  12  15  0.2  5.59999990  0.427986741     20  0   #GLUTAMINE      SERINE                        
+pair_coeff  12  16  0.2  6.05000019  0.429899275     20  0   #GLUTAMINE      HYSTIDINE                     
+pair_coeff  12  17  0.2  5.85000038  0.409508884     20  0   #GLUTAMINE      ASPARGINE                     
+pair_coeff  12  18  0.2  5.78999996  0.376372248     20  0   #GLUTAMINE      PROLINE                       
+pair_coeff  12  19  0.2  5.75000000  0.477487683     20  0   #GLUTAMINE      CYSTEINE                      
+pair_coeff  12  20  0.2  6.09999990  0.467897087     20  0   #GLUTAMINE      ISOLEUCINE                    
+pair_coeff  13  13  0.2  6.77999973  0.989376485     20  0   #TRYPTOPHANE    TRYPTOPHANE                   
+pair_coeff  13  14  0.2  6.56999922  0.928306222     20  0   #TRYPTOPHANE    PHENYLALANINE                 
+pair_coeff  13  15  0.2  5.98000002  0.725959063     20  0   #TRYPTOPHANE    SERINE                        
+pair_coeff  13  16  0.2  6.42999983  0.727871597     20  0   #TRYPTOPHANE    HYSTIDINE                     
+pair_coeff  13  17  0.2  6.23000002  0.707481205     20  0   #TRYPTOPHANE    ASPARGINE                     
+pair_coeff  13  18  0.2  6.16999960  0.674344540     20  0   #TRYPTOPHANE    PROLINE                       
+pair_coeff  13  19  0.2  6.12999964  0.775460005     20  0   #TRYPTOPHANE    CYSTEINE                      
+pair_coeff  13  20  0.2  6.48000002  0.765869379     20  0   #TRYPTOPHANE    ISOLEUCINE                    
+pair_coeff  14  14  0.2  6.35999966  0.867235899     20  0   #PHENYLALANINE  PHENYLALANINE                 
+pair_coeff  14  15  0.2  5.76999998  0.664888799     20  0   #PHENYLALANINE  SERINE                        
+pair_coeff  14  16  0.2  6.21999979  0.666801333     20  0   #PHENYLALANINE  HYSTIDINE                     
+pair_coeff  14  17  0.2  6.01999998  0.646410882     20  0   #PHENYLALANINE  ASPARGINE                     
+pair_coeff  14  18  0.2  5.95999956  0.613274276     20  0   #PHENYLALANINE  PROLINE                       
+pair_coeff  14  19  0.2  5.92000008  0.714389682     20  0   #PHENYLALANINE  CYSTEINE                      
+pair_coeff  14  20  0.2  6.26999950  0.704799116     20  0   #PHENYLALANINE  ISOLEUCINE                    
+pair_coeff  15  15  0.2  5.17999983  0.462541670     20  0   #SERINE         SERINE                        
+pair_coeff  15  16  0.2  5.62999964  0.464454204     20  0   #SERINE         HYSTIDINE                     
+pair_coeff  15  17  0.2  5.42999983  0.444063783     20  0   #SERINE         ASPARGINE                     
+pair_coeff  15  18  0.2  5.36999989  0.410927176     20  0   #SERINE         PROLINE                       
+pair_coeff  15  19  0.2  5.32999992  0.512042582     20  0   #SERINE         CYSTEINE                      
+pair_coeff  15  20  0.2  5.67999935  0.502452016     20  0   #SERINE         ISOLEUCINE                    
+pair_coeff  16  16  0.2  6.07999992  0.466366738     20  40  #HYSTIDINE      HYSTIDINE                     
+pair_coeff  16  17  0.2  5.88000011  0.445976317     20  0   #HYSTIDINE      ASPARGINE                     
+pair_coeff  16  18  0.2  5.82000017  0.412839711     20  0   #HYSTIDINE      PROLINE                       
+pair_coeff  16  19  0.2  5.77999926  0.513955116     20  0   #HYSTIDINE      CYSTEINE                      
+pair_coeff  16  20  0.2  6.12999964  0.504364550     20  0   #HYSTIDINE      ISOLEUCINE                    
+pair_coeff  17  17  0.2  5.68000031  0.425585896     20  0   #ASPARGINE      ASPARGINE                     
+pair_coeff  17  18  0.2  5.62000036  0.392449260     20  0   #ASPARGINE      PROLINE                       
+pair_coeff  17  19  0.2  5.57999945  0.493564725     20  0   #ASPARGINE      CYSTEINE                      
+pair_coeff  17  20  0.2  5.92999983  0.483974099     20  0   #ASPARGINE      ISOLEUCINE                    
+pair_coeff  18  18  0.2  5.55999994  0.359312654     20  0   #PROLINE        PROLINE                       
+pair_coeff  18  19  0.2  5.51999998  0.460428089     20  0   #PROLINE        CYSTEINE                      
+pair_coeff  18  20  0.2  5.86999989  0.450837493     20  0   #PROLINE        ISOLEUCINE                    
+pair_coeff  19  19  0.2  5.47999954  0.561543524     20  0   #CYSTEINE       CYSTEINE                      
+pair_coeff  19  20  0.2  5.82999945  0.551952958     20  0   #CYSTEINE       ISOLEUCINE                    
+pair_coeff  20  20  0.2  6.17999983  0.542362332     20  0   #ISOLEUCINE     ISOLEUCINE                    
+
+
+##### FUS ONLY #####
+#group CD1 id 285:371 811:897 1337:1423 1863:1949 2389:2475 2915:3001 3441:3527 3967:4053 4493:4579 5019:5105 5545:5631 6071:6157 6597:6683 7123:7209 7649:7735 8175:8261 8701:8787 9227:9313 9753:9839 10279:10365 10805:10891 11331:11417 11857:11943 12383:12469 12909:12995 13435:13521 13961:14047 14487:14573 15013:15099 15539:15625 16065:16151 16591:16677 17117:17203 17643:17729 18169:18255 18695:18781 19221:19307 19747:19833 20273:20359 20799:20885 21325:21411 21851:21937 22377:22463 22903:22989 23429:23515 23955:24041 24481:24567 25007:25093
+
+
+#group CD2 id 422:453 948:979 1474:1505 2000:2031 2526:2557 3052:3083 3578:3609 4104:4135 4630:4661 5156:5187 5682:5713 6208:6239 6734:6765 7260:7291 7786:7817 8312:8343 8838:8869 9364:9395 9890:9921 10416:10447 10942:10973 11468:11499 11994:12025 12520:12551 13046:13077 13572:13603 14098:14129 14624:14655 15150:15181 15676:15707 16202:16233 16728:16759 17254:17285 17780:17811 18306:18337 18832:18863 19358:19389 19884:19915 20410:20441 20936:20967 21462:21493 21988:22019 22514:22545 23040:23071 23566:23597 24092:24123 24618:24649 25144:25175
+
+#group     nonrigid subtract all CD1 CD2
+#neigh_modify  exclude molecule/intra CD1
+#neigh_modify  exclude molecule/intra CD2
+##### END FUS #####
+
+##### DO NOT CHANGE #####
+special_bonds fene
+neighbor  3.5 multi
+neigh_modify  every 10 delay 0
+comm_style    tiled
+##### END NO CHANGE #####
+
+timestep      10 # fs
+
+
+#reset_timestep 0
+velocity      all create ${T} 29311 # Generate random seeds
+
+
+##### FUS ONLY #####
+fix           fxnve all nve
+fix           fxlange all langevin               ${T} ${T} 5000.0 32784
+fix           fxbal  all balance 1000 1.05 rcb
+#fix           fxnverigid1 CD1 rigid/nvt molecule temp 1004 1004 5000.0
+#fix           fxnverigid2 CD2 rigid/nvt molecule temp 1004 1004 5000.0 
+#fix           fxlange nonrigid langevin               1004 1004 5000.0 32784
+#fix           fxnpt nonrigid press/berendsen y 6 6  5000.0 dilate all
+##### FUS ONLY #####
+
+#fix           visco all viscous 100000
+#fix           fixcentro all recenter INIT INIT INIT
+#fix           fxbal  all balance 1000 1.05 rcb
+#write_data final.data
+
+#fix           fxnve   all nve
+#fix           fxlange all langevin ${T} ${T} 5000.0 32784
+#fix 23 all npt temp ${T} ${T} 5000.0 iso 0 0 5000.1
+
+########################  Radius  #################################
+#compute cc1 all chunk/atom molecule
+#compute radio all gyration/chunk cc1
+#variable media_radio equal ave(c_radio)
+#fix ex all print 10000 "${media_radio}" file gyration.out screen no
+#fix radio  all ave/time 10000 1 10000 c_radio[*] file radio.out mode vector
+###################################################################
+
+##########################  Density  ################################
+compute densidad all chunk/atom bin/1d z lower 1
+fix 3 all ave/chunk 100000 1 100000 densidad density/mass file density.profile
+####################################################################
+compute k all gyration
+compute cc1 all chunk/atom molecule
+compute radio all gyration/chunk cc1
+variable media_radio equal ave(c_radio)
+fix ex all print 100000 "${media_radio}" file gyration.out screen no
+fix radio  all ave/time 100000 1 100000 c_radio file radio.out mode vector
+
+dump          1 all custom 100000 result.lammpstrj id mol type q xu yu zu 
+#dump          2 all molfile 1000 result.pdb pdb :/home/ag949/plugins/install/plugins/LINUXIA64/molfile
+dump_modify   1 sort id
+
+#compute       rad all gyration
+#compute       dis all pair/local dist
+#compute       maximo all reduce max c_dis
+#compute       mean all reduce ave c_dis
+
+thermo        1000
+thermo_style  custom step pe press ke temp lx ly lz pxx pyy pzz  spcpu density
+#thermo_style  custom step pe epair eangle ebond press ke temp lx ly lz pxx pyy pzz  spcpu density v_media_radio #f_5[1] f_5[2] v_p1 v_h1  f_5[3] f_5[4] v_p2 v_h2 f_5[5] f_5[6] f_5[7] v_p3 v_h3 v_b3 #c_red v_50 #v_catoff_coord_back3 #c_23[2]
+thermo_modify flush yes
+
+#timer timeout 35:58:00 every 100
+#restart      200000 restart.tmp
+restart       100000 restart1.tmp restart2.tmp
+run           ${nts}
+#shell sh again.sh
+write_data final.data nocoeff
