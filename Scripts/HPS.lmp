@@ -21,6 +21,12 @@ read_data  data.xyz
 #replicate 1 1 2
 dielectric  80.0
 pair_style  ljlambda 0.1 0.0 35.0
+
+set type * charge 0
+set type 3 charge 1
+set type 5 charge 1
+set type 7 charge -1
+set type 8 charge -1
 # pairwise coefficients
 #                         k-spring  resting postion spring in A
 bond_coeff          1     9.600     3.81 
@@ -915,6 +921,6 @@ thermo_modify flush yes
 
 #restart       2000000 restart.tmp
 restart 100000 restart1.tmp restart2.tmp
-run ${T}
+run ${nts}
 #run           200000000
 write_data final.data nocoeff

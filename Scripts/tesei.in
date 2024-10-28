@@ -15,7 +15,7 @@ variable csx equal 150 # Electrolyte solution ionic strength in mM
 variable cs equal (${csx}/1000)*6.022e26 # Electrolyte solution ionic strength in m^-3
 variable er equal 5321/${T}+233.76-0.9297*${T}+0.001417*${T}*${T}-0.0000008292*${T}*${T}*${T} # Relative dielectric constant of the medium
 dielectric  ${er} # Relative dielectric constant of the medium again, it has to be defined here as well
-variable bjerrum equal (1.671e-5)/(${er}*${T}) # Bjerrum length in meters
+variable bjerr0um equal (1.671e-5)/(${er}*${T}) # Bjerrum length in meters
 variable debyelen equal sqrt(1/(8*3.141592*${bjerrum}*${cs})) # Debye length in meters
 variable debyelenang equal ${debyelen}*1e10 # Debye length in Angstrom
 variable kappa equal 1/${debyelenang} # Inverse of debye length in Angstrom^-1 to go to pair style command
@@ -66,7 +66,7 @@ set type 8 charge -1
 # parameters documentation in https://github.com/KULL-Centre/CALVADOS/blob/main/residues.csv
 #extra parameters for reactions:
 angle_coeff         1     0.0001      180
-angle_coeff         2     5          180
+#angle_coeff         2     5          180
 # pairwise coefficients
 #         type1  type2 epsilon  sigma       lambda   lj_cut coulm_cut # aminoacid1 aminoacid2
 pair_coeff   *   *  0.000   0.000     0.0000       0.000  0.000
